@@ -31,6 +31,10 @@ struct Cli {
     /// Whether the matching will be case insensitive (defaults to false)
     #[arg(short = 'i', long)]
     case_insensitive: bool,
+
+    /// If negative values should be removes
+    #[arg(long)]
+    remove_negatives: bool,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -71,31 +75,40 @@ fn main() -> Result<(), Box<dyn Error>> {
         .apply_modifier(UTF8_ROUND_CORNERS)
         .set_header(vec!["Group", "Amount"]);
 
-    let total: f64 = match cli.pattern {
+    let mut map = match cli.pattern {
         Some(pattern) => {
             let re = RegexSetBuilder::new(pattern)
                 .case_insensitive(cli.case_insensitive)
                 .build()?;
 
-            let filtered_map = map
-                .iter()
-                .filter(|(k, _)| re.is_match(k))
-                .collect::<BTreeMap<&String, &f64>>();
-
-            filtered_map.iter().for_each(|(&k, v)| {
-                table.add_row(Vec::from(&[k, &format!("{v:.2}")]));
-            });
-
-            filtered_map.values().cloned().sum()
+            map.iter()
+                .filter_map(|(k, &v)| {
+                    if re.is_match(k) {
+                        table.add_row(Vec::from(&[k, &format!("{v:.2}")]));
+                        Some((k.clone(), v))
+                    } else {
+                        None
+                    }
+                })
+                .collect()
         }
         None => {
             map.iter().for_each(|(k, v)| {
                 table.add_row(Vec::from(&[k, &format!("{v:.2}")]));
             });
 
-            map.values().sum()
+            map
         }
     };
+
+    if cli.remove_negatives {
+        map = map
+            .iter()
+            .filter_map(|(k, &v)| if v >= 0.0 { Some((k.clone(), v)) } else { None })
+            .collect();
+    }
+
+    let total: f64 = map.values().sum();
 
     table.add_row(vec![
         Cell::new("TOTAL")
