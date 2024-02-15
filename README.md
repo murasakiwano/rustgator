@@ -15,6 +15,7 @@ Options:
   -g, --group-by <GROUP_BY>  Which header to group the records by
   -p, --pattern <PATTERN>    If this flag is present, will group the amounts which match a regex
   -i, --case-insensitive     Whether the matching will be case insensitive (defaults to false)
+      --remove-negatives     If negative values should be removes
   -h, --help                 Print help
   -V, --version              Print version
 ```
