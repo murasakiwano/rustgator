@@ -9,7 +9,12 @@ use csv::Reader;
 use regex::RegexSetBuilder;
 
 #[derive(Parser)]
-#[command(name = "rustgator", version, about = "read and aggregate CSV files")]
+#[command(
+    name = "rustgator",
+    version,
+    about = "read and aggregate CSV files",
+    author = "Johann Homonnai <github.com/murasakiwano>"
+)]
 struct Cli {
     /// Path to the csv file
     #[arg(short, long)]
