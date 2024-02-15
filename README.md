@@ -5,7 +5,7 @@ may perform calculations in it, printing in a nice table.
 
 ## Usage
 
-```shell
+```
 read and aggregate CSV files
 
 Usage: rustgator [OPTIONS] --file <FILE> --group-by <GROUP_BY>
@@ -39,7 +39,7 @@ $ cargo run -- -f test.csv --group-by category
 It will display a table showing the total amount by category. Using the example
 above will result in:
 
-```shell
+```
 ╭──────────┬────────╮
 │ Group    ┆ Amount │
 ╞══════════╪════════╡
