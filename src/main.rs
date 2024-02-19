@@ -17,11 +17,9 @@ use regex::RegexSetBuilder;
 )]
 struct Cli {
     /// Path to the csv file
-    #[arg(short, long)]
     file: PathBuf,
 
     /// Which header to group the records by
-    #[arg(short, long)]
     group_by: String,
 
     /// If this flag is present, will group the amounts which match a regex
