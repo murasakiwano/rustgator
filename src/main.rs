@@ -33,6 +33,10 @@ struct Cli {
     /// If negative values should be removed
     #[arg(long)]
     remove_negatives: bool,
+
+    /// Optional flag to set the column which should be calculated. Defaults to `amount`
+    #[arg(short, long = "column", default_value_t = String::from("amount"))]
+    column_to_calculate: String,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -48,13 +52,20 @@ fn main() -> Result<(), Box<dyn Error>> {
             "group-by should be one of {:?}, got {}",
             headers, cli.group_by
         ))?;
+    let calculated_idx = headers
+        .iter()
+        .position(|s| s == cli.column_to_calculate)
+        .ok_or(format!(
+            "file does not have column `{}`",
+            cli.column_to_calculate
+        ))?;
 
     let mut map: BTreeMap<String, f64> = BTreeMap::new();
 
     for record in rdr.records() {
         let record = record?;
         let amount = record
-            .get(record.len() - 1)
+            .get(calculated_idx)
             .ok_or(format!("Record has length 0: {record:?}"))
             .and_then(|v| v.parse::<f64>().map_err(|e| e.to_string()))?;
         let group = record
