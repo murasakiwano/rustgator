@@ -34,6 +34,10 @@ struct Cli {
     #[arg(long)]
     remove_negatives: bool,
 
+    /// If positive values should be removed
+    #[arg(long)]
+    remove_positives: bool,
+
     /// Optional flag to set the column which should be calculated. Defaults to `amount`
     #[arg(short, long = "column", default_value_t = String::from("amount"))]
     column_to_calculate: String,
@@ -110,6 +114,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             .iter()
             .filter_map(|(k, v)| {
                 if *v >= 0.0 {
+                    Some((k.clone(), *v))
+                } else {
+                    None
+                }
+            })
+            .collect();
+    } else if cli.remove_positives {
+        tuple_vector = tuple_vector
+            .iter()
+            .filter_map(|(k, v)| {
+                if *v < 0.0 {
                     Some((k.clone(), *v))
                 } else {
                     None
