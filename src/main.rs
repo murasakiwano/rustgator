@@ -30,7 +30,7 @@ struct Cli {
     #[arg(short = 'i', long)]
     case_insensitive: bool,
 
-    /// If negative values should be removes
+    /// If negative values should be removed
     #[arg(long)]
     remove_negatives: bool,
 }
