@@ -84,7 +84,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .apply_modifier(UTF8_ROUND_CORNERS)
         .set_header(vec!["Group", "Amount"]);
 
-    let mut map = match cli.pattern {
+    let map = match cli.pattern {
         Some(pattern) => {
             let re = RegexSetBuilder::new(pattern)
                 .case_insensitive(cli.case_insensitive)
@@ -93,7 +93,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             map.iter()
                 .filter_map(|(k, &v)| {
                     if re.is_match(k) {
-                        table.add_row(Vec::from(&[k, &format!("{v:.2}")]));
                         Some((k.clone(), v))
                     } else {
                         None
@@ -101,24 +100,31 @@ fn main() -> Result<(), Box<dyn Error>> {
                 })
                 .collect()
         }
-        None => {
-            map.iter().for_each(|(k, v)| {
-                table.add_row(Vec::from(&[k, &format!("{v:.2}")]));
-            });
-
-            map
-        }
+        None => map,
     };
 
+    let mut tuple_vector = map.into_iter().collect::<Vec<_>>();
+
     if cli.remove_negatives {
-        map = map
+        tuple_vector = tuple_vector
             .iter()
-            .filter_map(|(k, &v)| if v >= 0.0 { Some((k.clone(), v)) } else { None })
+            .filter_map(|(k, v)| {
+                if *v >= 0.0 {
+                    Some((k.clone(), *v))
+                } else {
+                    None
+                }
+            })
             .collect();
     }
 
-    let total: f64 = map.values().sum();
+    tuple_vector.sort_unstable_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap());
 
+    let total: f64 = tuple_vector.iter().map(|(_, v)| v).sum();
+
+    tuple_vector.iter().for_each(|(k, v)| {
+        table.add_row(vec![k, &format!("{v:.2}")]);
+    });
     table.add_row(vec![
         Cell::new("TOTAL")
             .add_attribute(Attribute::Bold)
